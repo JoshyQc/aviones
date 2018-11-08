@@ -11,7 +11,7 @@ use App\Aeropuerto;
 class AeropuertoController extends Controller
 {
     public function index(){
-
+        $database -> $this->initFirebase();
         $aeropuertos = $database->getReference('aeropuertos')->getValue();
         
         $parced_array  = array();

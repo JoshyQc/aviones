@@ -20,27 +20,27 @@
 				  <tbody>
 				  	@foreach ($vuelos as $vuelo)
 					    <tr>
-					      <th scope="row">{{$vuelo->id}}</th>
-					      <td>{{$vuelo->fecha_salida}}</td>
-					      <td>{{$vuelo->fecha_llegada}}</td>
+					      <th scope="row">{{$vuelo['id']}}</th>
+					      <td>{{$vuelo['fecha_salida']}}</td>
+					      <td>{{$vuelo['fecha_llegada']}}</td>
 					      <td>
 					      	@foreach ($aeropuertos as $aeropuerto)
-					      	@if($aeropuerto->id == $vuelo->id_salida_aeropuerto)
-					      	{{$aeropuerto->nombre}}
+					      	@if($aeropuerto['id'] == $vuelo['id_salida_aeropuerto'])
+					      	{{$aeropuerto['nombre']}}
 					      	@endif
 					      	@endforeach	      	
 					      </td>
 					      <td>
 					      	@foreach ($aeropuertos as $aeropuerto)
-					      	@if($aeropuerto->id == $vuelo->id_llegada_aeropuerto)
-					      	{{$aeropuerto->nombre}}
+					      	@if($aeropuerto['id'] == $vuelo['id_llegada_aeropuerto'])
+					      	{{$aeropuerto['nombre']}}
 					      	@endif
 					      	@endforeach
 					      </td>
 					      <td>
 					      	<form method="POST" action="/vuelo/delete">
-					      		<input type="hidden" name="id" value="{{$vuelo->id}}">
-					      		<a href="/vuelo/edit/{{$vuelo->id}}" class="btn btn-outline-info btn-sm" role="button" aria-disabled="true">Editar</a>	
+					      		<input type="hidden" name="id" value="{{$vuelo['id']}}">
+					      		<a href="/vuelo/edit/{{$vuelo['id']}}" class="btn btn-outline-info btn-sm" role="button" aria-disabled="true">Editar</a>	
 					      	</form>
 					      	
 					      </td>
@@ -79,7 +79,7 @@
 						    <select name="id_salida_aeropuerto" name="id_salida_aeropuerto" required>
 						    	<option value="">-- SELECCIONE --</option>
 						    	@foreach ($aeropuertos as $a)
-						    	<option value="{{$a->id}}">{{$a->id}} - {{$a->nombre}}</option>
+						    	<option value="{{$a['id']}}">{{$a['id']}} - {{$a['nombre']}}</option>
 						    	@endforeach
 						    </select>
 						    <!--<input type="date" class="form-control" id="id_salida_aeropuerto" name="id_salida_aeropuerto" required>-->
@@ -88,8 +88,8 @@
 						    <label for="id_llegada_aeropuerto">Aeropuerto de Entrada</label>
 						    <select id="id_llegada_aeropuerto" name="id_llegada_aeropuerto" required>
 						    	<option value="">-- SELECCIONE --</option>
-						    	@foreach($aeropuertos as $aeropuerto)
-						    	<option value="{{$aeropuerto->id}}">{{$aeropuerto->id}} - {{$aeropuerto->nombre}}</option>
+						    	@foreach ($aeropuertos as $a)
+						    	<option value="{{$a['id']}}">{{$a['id']}} - {{$a['nombre']}}</option>
 						    	@endforeach
 						    </select>
 						    <!--<input type="date" class="form-control" id="id_llegada_aeropuerto" name="id_llegada_aeropuerto" required>-->
