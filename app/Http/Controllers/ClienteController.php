@@ -38,27 +38,43 @@ class ClienteController extends Controller
 
     public function storeApi(Request $request){
 
-    	$cliente = new Cliente;
-    	$cliente-> dni = $request->dni;
-    	$cliente-> nombre = $request->nombre;
-    	$cliente-> apellido = $request->apellido;
-    	$cliente-> telefono = $request->telefono;
-    	$cliente-> direccion = $request->direccion; 
-    	$cliente-> save();
-
-        $reserva = new Reserva;
-        $reserva-> fecha = DB::raw('now()');
-        $reserva-> id_cliente = $cliente -> id;
-        $reserva->save();
-
-        $ultimoEmbarque = Embarque::all()->last();
-
-
+        $database = $this->initFirebase();
+        $cliente = $database
+        ->getReference('clientes')
+        ->push([
+            'dni' => $request->dni,
+            'nombre' => $request->nombre,
+            'apellido' => $request->apellido,
+            'telefono' => $request->telefono,
+            'direccion' => $request->direccion
+        ]);
+        
+        $reserva = $database->getReference('reservas')
+        ->push([
+            'fecha' =>  DB::raw('now()'),
+            'id_cliente' => $cliente->getKey()
+        ]);
+        
+        $embarques = $database->getReference('embarques')->getValue();
+        $ultimoEmbarque = null;
+        if(!is_null($embarques)){
+            $embarques_array  = array();
+            foreach ($embarques as $key => $value){
+                array_push($embarques_array, [
+                    'id'=>$key, 
+                    'asiento' => $value['asiento'],
+                    'id_vuelo' => $value['id_vuelo'],
+                    'id_reserva' => $value['id_reserva'],
+                    'id_cliente' => $value['id_cliente'],
+                ]);
+            }
+            $ultimoEmbarque = end($embarques_array);
+        }
         if(is_null($ultimoEmbarque)){
             $asiento  =  "A-1";
         }else{
-            $letra = explode("-", $ultimoEmbarque->asiento)[0];
-            $numero = explode("-", $ultimoEmbarque->asiento)[1];
+            $letra = explode("-", $ultimoEmbarque['asiento'])[0];
+            $numero = explode("-", $ultimoEmbarque['asiento'])[1];
 
             if($numero > 9){
                 $letra++;
@@ -68,20 +84,21 @@ class ClienteController extends Controller
             }
             $asiento =  $letra."-".$numero;
         }
-        
-        $embarque = new Embarque;
-        $embarque->asiento = $asiento;
-        $embarque->id_vuelo = $request->id_vuelo;
-        $embarque->id_reserva = $reserva->id;
-        $embarque->id_cliente = $cliente->id;  
-        $embarque->save();
 
-        $vuelo = Vuelo::find($request->id_vuelo);
+        $embarque = $database->getReference('embarques')
+        ->push([
+            'asiento' => $asiento,
+            'id_vuelo' => $request->id_vuelo,
+            'id_reserva' => $reserva->getKey(),
+            'id_cliente' => $cliente->getKey(),
+        ]);
 
-        $salida = Aeropuerto::find($vuelo->id_salida_aeropuerto);
-        $llegada = Aeropuerto::find($vuelo->id_llegada_aeropuerto);
 
-    	return json_encode(['embarque' => $embarque, 'cliente' => $cliente, 'vuelo' => $vuelo, 'salida' => $salida, 'llegada' => $llegada]);
+        $vuelo = $database->getReference('vuelos/' . $request->id_vuelo)->getValue();
+        $salida = $database->getReference('aeropuertos/' . $vuelo['id_salida_aeropuerto'])->getValue();
+        $llegada = $database->getReference('aeropuertos/' . $vuelo['id_llegada_aeropuerto'])->getValue();
+
+    	return json_encode(['embarque' => $embarque->getValue(), 'cliente' => $cliente->getValue(), 'vuelo' => $vuelo, 'salida' => $salida, 'llegada' => $llegada]);
     }
 
 

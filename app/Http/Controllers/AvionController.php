@@ -19,7 +19,7 @@ class AvionController extends Controller{
         $parced_array  = array();
         foreach ($aviones as $key => $value){
         	array_push($parced_array, ['id'=>$key, 'plaza' => $value['plaza']]);
-  	}
+  		}
 
 
 		return $parced_array;
